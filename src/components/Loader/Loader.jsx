@@ -1,7 +1,8 @@
 import { ThreeDots } from 'react-loader-spinner';
 import PropTypes from 'prop-types';
 
-const Loader = ({ isVisible }) => {
+// const Loader = ({ isVisible }) => {
+const Loader = () => {
   return (
     <div className="Wrapper">
       <ThreeDots
@@ -12,7 +13,7 @@ const Loader = ({ isVisible }) => {
         ariaLabel="three-dots-loading"
         wrapperStyle={{}}
         wrapperClassName=""
-        visible={isVisible}
+        visible="true"
       />
     </div>
   );

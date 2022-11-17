@@ -1,4 +1,5 @@
 import PropTypes from 'prop-types';
+import { memo } from 'react';
 
 const ImageGalleryItem = ({ data, src, alt }) => {
   return (
@@ -8,7 +9,7 @@ const ImageGalleryItem = ({ data, src, alt }) => {
   );
 };
 
-export default ImageGalleryItem;
+export default memo(ImageGalleryItem);
 
 ImageGalleryItem.propTypes = {
   data: PropTypes.string,

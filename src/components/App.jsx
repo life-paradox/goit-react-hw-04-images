@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
 import Button from './Button/Button';
@@ -7,79 +7,79 @@ import Modal from './Modal/Modal';
 
 import { fetchImages } from '../api/imagesApi';
 
-class App extends Component {
-  state = {
-    currentPage: 1,
-    loaderVisibility: false,
-    showModal: false,
-    currentImage: '',
+const App = () => {
+  const [images, setImages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loaderVisibility, setLoaderVisibility] = useState(false);
+  const [buttonVisibility, setButtonVisibility] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [currentImage, setCurrentImage] = useState('');
+  const [currentQuery, setCurrentQuery] = useState('');
+
+  const toggleModal = () => {
+    setShowModal(!showModal);
   };
 
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({
-      showModal: !showModal,
-    }));
-  };
-
-  onSubmit = ({ input }) => {
-    this.setState({ loaderVisibility: true });
+  const onSubmit = input => {
+    setLoaderVisibility(true);
 
     fetchImages(input, 1)
       .then(response => {
-        this.setState({
-          images: response.data.hits,
-          currentQuery: input,
-          currentPage: 1,
-        });
+        setImages(response.data.hits);
+        setCurrentQuery(input);
+        setCurrentPage(1);
+
+        buttonVisibilityHandler(response);
       })
-      .finally(this.setState({ loaderVisibility: false }));
+      .finally(setLoaderVisibility(false));
   };
 
-  onLoadMore = () => {
-    this.setState({ loaderVisibility: true });
-    const { currentQuery, currentPage } = this.state;
+  const onLoadMore = () => {
+    setLoaderVisibility(true);
 
     fetchImages(currentQuery, currentPage + 1)
-      .then(promise => {
-        this.setState(prevState => ({
-          images: [...prevState.images, ...promise.data.hits],
-          currentPage: prevState.currentPage + 1,
-        }));
+      .then(response => {
+        setImages(prevState => [...prevState, ...response.data.hits]);
+        setCurrentPage(prevState => prevState + 1);
+        buttonVisibilityHandler(response);
       })
-      .finally(this.setState({ loaderVisibility: false }));
+      .finally(setLoaderVisibility(false));
   };
 
-  handleClickImage = e => {
+  const buttonVisibilityHandler = arr => {
+    if (arr.data.hits.length === 12) {
+      setButtonVisibility(true);
+    } else {
+      setButtonVisibility(false);
+    }
+  };
+
+  const handleClickImage = e => {
     const elem = e.target;
     if (!elem.classList.contains('ImageGalleryItem-image')) {
       return;
     }
-    this.setState({ currentImage: e.target.getAttribute('data') });
-    this.toggleModal();
+    setCurrentImage(e.target.getAttribute('data'));
+    toggleModal();
   };
 
-  componentDidMount() {
-    window.addEventListener('click', this.handleClickImage);
-  }
+  useEffect(() => {
+    window.addEventListener('click', handleClickImage);
 
-  componentWillUnmount() {
-    window.removeEventListener('click', this.handleClickImage);
-  }
+    return () => {
+      window.removeEventListener('click', handleClickImage);
+    };
+  });
 
-  render() {
-    const { images, loaderVisibility, showModal, currentImage } = this.state;
-
-    return (
-      <div className="App">
-        <Searchbar onSubmit={this.onSubmit} />
-        {images && images.length > 0 && <ImageGallery images={images} />}
-
-        <Loader isVisible={loaderVisibility} />
-        {images && images.length > 0 && <Button onClick={this.onLoadMore} />}
-        {showModal && <Modal onClose={this.toggleModal} src={currentImage} />}
-      </div>
-    );
-  }
-}
+  return (
+    <div className="App">
+      <Searchbar onSubmit={onSubmit} />
+      {images && images.length > 0 && <ImageGallery images={images} />}
+      {loaderVisibility && <Loader />}
+      {buttonVisibility && <Button onClick={onLoadMore} />}
+      {showModal && <Modal onClose={toggleModal} src={currentImage} />}
+    </div>
+  );
+};
 
 export default App;
