@@ -41,6 +41,7 @@ const App = () => {
       .then(response => {
         setImages(prevState => [...prevState, ...response.data.hits]);
         setCurrentPage(prevState => prevState + 1);
+
         buttonVisibilityHandler(response);
       })
       .finally(setLoaderVisibility(false));
