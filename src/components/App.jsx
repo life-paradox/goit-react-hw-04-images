@@ -57,10 +57,11 @@ const App = () => {
 
   const handleClickImage = e => {
     const elem = e.target;
-    if (!elem.classList.contains('ImageGalleryItem-image')) {
+    if (!elem.classList.contains('ImageGalleryItem-overlay')) {
       return;
     }
-    setCurrentImage(e.target.getAttribute('data'));
+
+    setCurrentImage(elem.getAttribute('data'));
     toggleModal();
   };
 
